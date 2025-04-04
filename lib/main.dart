@@ -5,15 +5,11 @@ import '../themes/themes.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(),
-      child: MyApp(),
-      ),
-    );
+    ChangeNotifierProvider(create: (_) => ThemeNotifier(), child: MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
@@ -23,9 +19,8 @@ class MyApp extends StatelessWidget {
 
           initialRoute: '/',
           routes: AppRoutes.getRoutes(),
-        
         );
-      }
+      },
     );
   }
 }

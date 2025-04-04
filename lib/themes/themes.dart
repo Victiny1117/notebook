@@ -7,17 +7,25 @@ ThemeData lightTheme = ThemeData(
   scaffoldBackgroundColor: const Color.fromARGB(238, 238, 238, 1000),
   appBarTheme: AppBarTheme(
     backgroundColor: const Color.fromARGB(224, 224, 224, 1000),
-    titleTextStyle: TextStyle(color: Colors.black, fontSize: 20),
+    titleTextStyle: TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
   ),
 );
 
-ThemeData darkTheme = ThemeData (
+ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   primarySwatch: Colors.blueGrey,
   scaffoldBackgroundColor: const Color.fromARGB(48, 48, 48, 1),
   appBarTheme: AppBarTheme(
-     backgroundColor: const Color.fromARGB(33, 33, 33, 1),
-     titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+    backgroundColor: const Color.fromARGB(33, 33, 33, 1),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
   ),
 );
 
@@ -25,7 +33,8 @@ class ThemeNotifier extends ChangeNotifier {
   ThemeData _currentTheme = lightTheme;
   bool _isDarkMode = false;
 
-  void toggleTheme() async { //para cambiar el tema, notificar el cambio al ui y guardar la preferencia
+  void toggleTheme() async {
+    //para cambiar el tema, notificar el cambio al ui y guardar la preferencia
     _isDarkMode = !_isDarkMode;
     _currentTheme = _isDarkMode ? darkTheme : lightTheme;
     notifyListeners();
@@ -33,7 +42,8 @@ class ThemeNotifier extends ChangeNotifier {
     await prefs.setBool('isDarkMode', _isDarkMode);
   }
 
-  void _loadTheme() async { //para obtener la preferencia guardada y cargarla
+  void _loadTheme() async {
+    //para obtener la preferencia guardada y cargarla
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('isDarkMode') ?? false;
     _currentTheme = _isDarkMode ? darkTheme : lightTheme;
@@ -46,5 +56,4 @@ class ThemeNotifier extends ChangeNotifier {
 
   ThemeData get currentTheme => _currentTheme;
   bool get isDarkMode => _isDarkMode;
-
 }
