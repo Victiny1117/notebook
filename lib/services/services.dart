@@ -16,7 +16,7 @@ class Services {
   Future<void> createNote(String content, String name) async {
     //crear notas
     final folder = await getNotesFolder();
-    final noteFile = File('${folder.path}/$name.text');
+    final noteFile = File('${folder.path}/$name.txt');
     await noteFile.writeAsString(content);
   }
 

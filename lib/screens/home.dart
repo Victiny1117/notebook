@@ -4,6 +4,36 @@ import '../services/services.dart';
 import 'package:provider/provider.dart';
 import '../themes/themes.dart';
 
+class NoteDetailScreen extends StatelessWidget {
+  final File note;
+
+  NoteDetailScreen({required this.note});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(note.path.split('/').last),
+      ),
+      body: FutureBuilder<String>(
+        future: note.readAsString(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error al cargar la nota'));
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(snapshot.data ?? ''),
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -22,11 +52,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadNotes() async {
     final files = await serv.getNotesFiles();
-    notes = files;
+    setState(() {
+      notes = files;
+    });
+  }
+
+  Future<void> _createNote() async {
+    final noteName = 'Nueva Nota';
+    await serv.createNote("Nueva nota creada desde la app.", noteName);
+    loadNotes(); // Recargar lista de notas
   }
 
   Widget build(BuildContext context) {
     //para armar el ui
+    final filteredNotes = notes.where((note) {
+      final title = note.path.split('/').last; //nombre del archivo
+      return title.toLowerCase().contains(search.toLowerCase()); //filtrar por búsqueda
+    }).toList();
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -50,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   filled: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 ),
-                style: TextStyle(color: Colors.white), // Estilo del texto del buscador
+                style: TextStyle(color: Colors.white),
                 onChanged: (value) {
                   setState(() {
                     search = value;
@@ -60,6 +102,52 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
     ),
+      ),
+      body: ListView.builder(
+        itemCount: filteredNotes.length,
+        itemBuilder: (context, index) {
+          final note = filteredNotes[index];
+          final title = note.path.split('/').last;
+
+          return ListTile(
+            leading: Icon(Icons.text_snippet),
+            title: Text(title),
+            subtitle: Text('Sin archivar'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NoteDetailScreen(note: note),
+                ),
+              );
+            },
+          );
+        },
+      ),
+
+      floatingActionButton: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+        onPressed: () {
+          // Agregar nueva nota
+          _createNote();
+        },
+        child: Icon(Icons.add),
+            ),
+    ),
+    Positioned(
+      left: 13,
+      bottom: 1,
+      child: FloatingActionButton(
+        onPressed: () {
+          Provider.of<ThemeNotifier>(context, listen: false).toggleTheme();
+        },
+        child: Icon(Icons.light),
+      ),
+      ),
+        ]
       ),
     );
   }
