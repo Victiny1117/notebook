@@ -26,8 +26,17 @@ class Services {
     return folder.listSync().whereType<File>().toList();
   }
 
+
+     Future<void> deleteAllNotes() async {
+    final folder = await getNotesFolder();
+    final files = folder.listSync().whereType<File>().toList();
+    for (var file in files) {
+      await file.delete();
+    }
+   }
   Future<void> updateNote(File note, String newContent) async {
     //editar notas
     await note.writeAsString(newContent);
   }
+
 }
