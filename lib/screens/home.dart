@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import '../themes/themes.dart';
 import 'package:image_picker/image_picker.dart';
 
-class NoteDetailScreen extends StatefulWidget { //editor de notas
+class NoteDetailScreen extends StatefulWidget {
+  //editor de notas
   File note;
   final Function refreshNotesCallback;
 
@@ -25,7 +26,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   void initState() {
     super.initState();
     _contentController = TextEditingController();
-    _renameController = TextEditingController(text: widget.note.path.split('/').last.split('.').first);
+    _renameController = TextEditingController(
+      text: widget.note.path.split('/').last.split('.').first,
+    );
 
     loadNoteContent();
     loadAttachedImage();
@@ -46,7 +49,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Future<void> loadAttachedImage() async {
     final directory = widget.note.parent;
-    final imageFile = File('${directory.path}/${_renameController.text}_image.jpg');
+    final imageFile = File(
+      '${directory.path}/${_renameController.text}_image.jpg',
+    );
     if (await imageFile.exists()) {
       setState(() {
         attachedImage = imageFile;
@@ -54,16 +59,44 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
+  Future<void> deleteAttachedImage() async {
+    //para eliminar la imagen y actualizar
+    try {
+      if (attachedImage != null && await attachedImage!.exists()) {
+        await attachedImage!.delete();
+        setState(() {
+          attachedImage = null;
+        });
+        widget.refreshNotesCallback();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Imagen adjuntada eliminada.')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No hay imagen adjuntada para eliminar.')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al eliminar la imagen: ${error.toString()}'),
+        ),
+      );
+    }
+  }
+
   Future<void> saveNote() async {
     try {
       await widget.note.writeAsString(_contentController.text);
       widget.refreshNotesCallback();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nota guardada correctamente')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nota guardada correctamente')));
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar la nota: ${error.toString()}')),
+        SnackBar(
+          content: Text('Error al guardar la nota: ${error.toString()}'),
+        ),
       );
     }
   }
@@ -94,12 +127,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         widget.note = newFile;
       });
       widget.refreshNotesCallback();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nota renombrada a $newName.txt')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nota renombrada a $newName.txt')));
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al renombrar la nota: ${error.toString()}')),
+        SnackBar(
+          content: Text('Error al renombrar la nota: ${error.toString()}'),
+        ),
       );
     }
   }
@@ -108,8 +143,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     try {
       final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
+        if (attachedImage != null && await attachedImage!.exists()) {
+          await attachedImage!.delete();
+        }
         final directory = widget.note.parent;
-        final imageFile = File('${directory.path}/${_renameController.text}_image.jpg');
+        final imageFile = File(
+          '${directory.path}/${_renameController.text}_image.jpg',
+        );
 
         await File(pickedFile.path).copy(imageFile.path);
         setState(() {
@@ -117,13 +157,15 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         });
 
         widget.refreshNotesCallback();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Imagen adjuntada a la nota.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Imagen adjuntada a la nota.')));
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al adjuntar la imagen: ${error.toString()}')),
+        SnackBar(
+          content: Text('Error al adjuntar la imagen: ${error.toString()}'),
+        ),
       );
     }
   }
@@ -135,11 +177,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       }
 
       final directory = widget.note.parent;
-      final imageFile = File('${directory.path}/${_renameController.text}_image.jpg');
+      final imageFile = File(
+        '${directory.path}/${_renameController.text}_image.jpg',
+      );
       if (await imageFile.exists()) {
         await imageFile.delete();
       }
-      
+
       widget.refreshNotesCallback();
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +191,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar la nota: ${error.toString()}')),
+        SnackBar(
+          content: Text('Error al eliminar la nota: ${error.toString()}'),
+        ),
       );
     }
   }
@@ -199,10 +245,22 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 icon: Icon(Icons.image),
                 label: Text('Adjuntar Imagen'),
               ),
-              if (attachedImage != null)
+              if (attachedImage !=
+                  null) //verificar si hay una imagen adjunta y mostrar la imagen junto a un boton para borrarla
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
-                  child: Image.file(attachedImage!),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Image.file(attachedImage!),
+                      SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: deleteAttachedImage,
+                        icon: Icon(Icons.delete),
+                        label: Text('Eliminar Imagen'),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           ),
@@ -212,7 +270,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 }
 
-class HomeScreen extends StatefulWidget { 
+class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -257,20 +315,29 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(
               flex: 2,
-              child: Text("NoteBook")),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/devInfo',
+                  ); //al tocar NoteBook, abre devInfo
+                },
+                child: Text("NoteBook"),
+              ),
+            ),
             SizedBox(width: 10),
             IconButton(
-        icon: Icon(Icons.light, color: iconColor),
-        onPressed: () {
-          Provider.of<ThemeNotifier>(
+              icon: Icon(
+                Icons.light,
+                color: Provider.of<ThemeNotifier>(context).iconColor,
+              ),
+              onPressed: () {
+                Provider.of<ThemeNotifier>(
                   context,
                   listen: false,
                 ).toggleTheme();
-                setState(() {
-                  iconColor = (iconColor == Colors.black) ? Colors.white : Colors.black;
-                });
-        },
-      ),
+              },
+            ),
             Expanded(
               flex: 3,
               child: TextField(
@@ -303,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: filteredNotes.length,
         itemBuilder: (context, index) {
           final note = filteredNotes[index];
-          final title = note.path.split('/').last;
+          final title = note.path.split('/').last.replaceAll('.txt', '');
 
           return ListTile(
             leading: Icon(Icons.text_snippet),
@@ -313,7 +380,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NoteDetailScreen(note: note, refreshNotesCallback: loadNotes,),
+                  builder:
+                      (context) => NoteDetailScreen(
+                        note: note,
+                        refreshNotesCallback: loadNotes,
+                      ),
                 ),
               );
             },
@@ -321,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
 
-   floatingActionButton: Stack(
+      floatingActionButton: Stack(
         children: [
           Align(
             alignment: Alignment.bottomRight,

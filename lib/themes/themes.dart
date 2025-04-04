@@ -32,14 +32,17 @@ ThemeData darkTheme = ThemeData(
 class ThemeNotifier extends ChangeNotifier {
   ThemeData _currentTheme = lightTheme;
   bool _isDarkMode = false;
+  Color _iconColor = Colors.black;
 
   void toggleTheme() async {
     //para cambiar el tema, notificar el cambio al ui y guardar la preferencia
     _isDarkMode = !_isDarkMode;
     _currentTheme = _isDarkMode ? darkTheme : lightTheme;
+    _iconColor = _isDarkMode ? Colors.white : Colors.black;
     notifyListeners();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkMode', _isDarkMode);
+    await prefs.setString('iconColor', _iconColor == Colors.white ? 'white' : 'black');
   }
 
   void _loadTheme() async {
@@ -47,6 +50,8 @@ class ThemeNotifier extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('isDarkMode') ?? false;
     _currentTheme = _isDarkMode ? darkTheme : lightTheme;
+    String? savedIconColor = prefs.getString('iconColor');
+   _iconColor = (savedIconColor == 'white') ? Colors.white : Colors.black;
     notifyListeners();
   }
 
@@ -56,4 +61,5 @@ class ThemeNotifier extends ChangeNotifier {
 
   ThemeData get currentTheme => _currentTheme;
   bool get isDarkMode => _isDarkMode;
+  Color get iconColor => _iconColor;
 }
