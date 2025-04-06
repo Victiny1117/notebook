@@ -31,5 +31,9 @@ Este programa es un bloc de notas que permite a los usuarios crear, editar y gua
 
 ## Autores
 
-- [Edwin Rodriguez](https://github.com/edwinxp1)
-- [Ziad Rivero](https://github.com/Victiny1117)
+- [**Edwin Rodriguez**](https://github.com/edwinxp1)
+- [**Ziad Rivero**](https://github.com/Victiny1117)
+
+## 🔗 Link del .apk
+
+[**Descargar aplicación en drive**](https://drive.google.com/drive/folders/12nbHPAxIU4-C3mZsLJIkRutgQABpMMjV)
